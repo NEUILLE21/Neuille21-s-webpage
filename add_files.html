@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Files - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Base Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('../Images/Fond.png');
+            background-size: auto;
+            background-position: top left;
+            background-repeat: repeat;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        h1 {
+            margin: 40px 0 20px;
+            text-align: center;
+            font-size: 2.2rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Login Status */
+        .login-status {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .login-status .logout-btn {
+            margin-left: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Hamburger Menu */
+        .hamburger-menu {
+            cursor: pointer;
+            font-size: 24px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            color: #333;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        /* Side Label Menu */
+        .side-label {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            padding: 60px 20px 20px;
+            transition: left 0.3s ease;
+            z-index: 900;
+        }
+
+        .side-label.open {
+            left: 0;
+        }
+
+        .side-label a {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            padding: 12px 0;
+            font-size: 16px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s ease;
+        }
+
+        .side-label a:hover {
+            background-color: #f5f5f5;
+            padding-left: 10px;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            display: none;
+        }
+
+        /* File Upload Form */
+        .upload-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 80%;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-label:hover {
+            border-color: #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .file-preview {
+            margin-top: 20px;
+        }
+
+        .file-preview-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .file-preview-item .file-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-preview-item .file-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .file-preview-item .remove-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .upload-container {
+                width: 90%;
+                padding: 20px;
+            }
+            .login-status {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Hamburger Menu -->
+    <div class="hamburger-menu" onclick="toggleSideLabel()">☰</div>
+
+    <!-- Login Status Indicator -->
+    <div id="loginStatus" class="login-status" style="display:none">
+        <span id="welcomeMessage"></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Side Label Menu -->
+    <div class="side-label" id="sideLabel">
+        <a href="index.html">Home</a>
+        <a href="login.html">Log-In</a>
+        <a href="contact.html">Contact Me</a>
+        <a href="#" onclick="toggleSideLabel()">Close Menu</a>
+    </div>
+
+    <h1>Add Files</h1>
+    
+    <!-- Alert Messages -->
+    <div id="successAlert" class="alert alert-success"></div>
+    <div id="errorAlert" class="alert alert-danger"></div>
+
+    <!-- File Upload Form -->
+    <div class="upload-container">
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="fileCategory">Category:</label>
+                <select id="fileCategory" class="form-control" required>
+                    <option value="">Select a category</option>
+                    <option value="computing">Computing</option>
+                    <option value="school">School</option>
+                    <option value="android">Android</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="fileDisplayName">Display Name:</label>
+                <input type="text" id="fileDisplayName" class="form-control" placeholder="Enter a display name for the file" required>
+            </div>
+            
+            <div class="form-group">
+                <label>File Upload:</label>
+                <input type="file" id="fileInput" class="file-input" required>
+                <label for="fileInput" class="file-label" id="fileInputLabel">
+                    <span>Click to select files or drag and drop here</span>
+                </label>
+                <div id="filePreview" class="file-preview"></div>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn">Upload File</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // ========================
+        // AUTHENTICATION SYSTEM
+        // ========================
+        
+        // Check if user is logged in
+        function isLoggedIn() {
+            const authToken = localStorage.getItem('authToken');
+            const expiry = localStorage.getItem('sessionExpiry');
+            
+            if (authToken && expiry && Date.now() < parseInt(expiry)) {
+                return true;
+            }
+            
+            // Clear invalid session
+            if (authToken) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('sessionExpiry');
+            }
+            return false;
+        }
+        
+        // Check if current user is owner
+        function isOwner() {
+            if (!isLoggedIn()) return false;
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            return currentUser && currentUser.role === 'owner';
+        }
+        
+        // Update UI based on login status
+        function updateUI() {
+            const loggedIn = isLoggedIn();
+            const owner = isOwner();
+            
+            // Update login status display
+            if (loggedIn) {
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                document.getElementById('loginStatus').style.display = 'flex';
+                document.getElementById('welcomeMessage').textContent = `Hi, ${user.username}!`;
+            } else {
+                document.getElementById('loginStatus').style.display = 'none';
+            }
+            
+            // Redirect if not owner
+            if (!owner) {
+                alert("You must be logged in as an owner to access this page");
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('sessionExpiry');
+            window.location.href = 'index.html';
+        }
+
+        // ========================
+        // MENU TOGGLE FUNCTION
+        // ========================
+        
+        function toggleSideLabel() {
+            const sideLabel = document.getElementById('sideLabel');
+            const overlay = document.getElementById('overlay');
+            
+            sideLabel.classList.toggle('open');
+            overlay.style.display = sideLabel.classList.contains('open') ? 'block' : 'none';
+        }
+        
+        // Close side menu when clicking overlay
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sideLabel').classList.remove('open');
+            this.style.display = 'none';
+        });
+
+        // ========================
+        // FILE UPLOAD SYSTEM (Updated for local server)
+        // ========================
+        
+        let selectedFile = null;
+        
+        // Handle file selection
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFile = e.target.files[0];
+            if (selectedFile) updateFilePreview(selectedFile);
+        });
+        
+        // Update file preview
+        function updateFilePreview(file) {
+            const filePreview = document.getElementById('filePreview');
+            filePreview.innerHTML = '';
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-preview-item';
+            
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-info';
+            
+            const fileIcon = document.createElement('img');
+            fileIcon.className = 'file-icon';
+            fileIcon.src = getFileIcon(file.name);
+            fileIcon.alt = 'File icon';
+            
+            const fileName = document.createElement('span');
+            fileName.textContent = file.name;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.onclick = function() {
+                selectedFile = null;
+                document.getElementById('fileInput').value = '';
+                filePreview.innerHTML = '';
+            };
+            
+            fileInfo.appendChild(fileIcon);
+            fileInfo.appendChild(fileName);
+            fileItem.appendChild(fileInfo);
+            fileItem.appendChild(removeBtn);
+            filePreview.appendChild(fileItem);
+        }
+        
+        // Get file icon based on extension
+        function getFileIcon(fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            const icons = {
+                'txt': 'icons/text.png',
+                'pdf': 'icons/pdf.png',
+                'zip': 'icons/zip.png',
+                'apk': 'icons/android.png',
+                'pptx': 'icons/presentation.png',
+                'doc': 'icons/document.png',
+                'docx': 'icons/document.png',
+                'xls': 'icons/spreadsheet.png',
+                'xlsx': 'icons/spreadsheet.png',
+                'jpg': 'icons/image.png',
+                'jpeg': 'icons/image.png',
+                'png': 'icons/image.png',
+                'gif': 'icons/image.png'
+            };
+            return icons[extension] || 'icons/file.png';
+        }
+        
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('fileCategory').value;
+            const displayName = document.getElementById('fileDisplayName').value;
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files.length) {
+                showAlert('Please select a file', 'error');
+                return;
+            }
+            
+            if (!category) {
+                showAlert('Please select a category', 'error');
+                return;
+            }
+            
+            if (!displayName) {
+                showAlert('Please enter a display name', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('displayName', displayName);
+            formData.append('category', category);
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/files', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error(await response.text());
+                
+                showAlert('File uploaded successfully!', 'success');
+                this.reset();
+                document.getElementById('filePreview').innerHTML = '';
+                selectedFile = null;
+            } catch (error) {
+                showAlert('Upload failed: ' + error.message, 'error');
+                console.error('Upload error:', error);
+            }
+        });
+        
+        // Show alert message
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById(type + 'Alert');
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // ========================
+        // INITIALIZATION
+        // ========================
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            
+            // Initialize drag and drop
+            const fileLabel = document.getElementById('fileInputLabel');
+            
+            fileLabel.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileLabel.style.borderColor = '#3498db';
+                fileLabel.style.backgroundColor = '#f8f9fa';
+            });
+            
+            fileLabel.addEventListener('dragleave', () => {
+                fileLabel.style.borderColor = '#ccc';
+                fileLabel.style.backgroundColor = 'transparent';
+            });
+            
+            fileLabel.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileLabel.style.borderColor = '#ccc';
+                fileLabel.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length) {
+                    document.getElementById('fileInput').files = e.dataTransfer.files;
+                    selectedFile = e.dataTransfer.files[0];
+                    updateFilePreview(selectedFile);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

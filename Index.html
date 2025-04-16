@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Base Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('../Images/Fond.png');
+            background-size: auto;
+            background-position: top left;
+            background-repeat: repeat;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        h1 {
+            margin: 40px 0 20px;
+            text-align: center;
+            font-size: 2.2rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Login Status */
+        .login-status {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .login-status .logout-btn {
+            margin-left: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Hamburger Menus */
+        .hamburger-menu {
+            cursor: pointer;
+            font-size: 24px;
+            position: fixed;
+            top: 10px;
+            z-index: 1000;
+            color: #333;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .hamburger-menu-left {
+            left: 10px;
+        }
+
+        .hamburger-menu-right {
+            right: 10px;
+        }
+
+        /* Side Label Menu */
+        .side-label {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            padding: 60px 20px 20px;
+            transition: left 0.3s ease;
+            z-index: 900;
+        }
+
+        .side-label.open {
+            left: 0;
+        }
+
+        .side-label a {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            padding: 12px 0;
+            font-size: 16px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s ease;
+        }
+
+        .side-label a:hover {
+            background-color: #f5f5f5;
+            padding-left: 10px;
+        }
+
+        /* Owner-only menu item */
+        .owner-only {
+            display: none;
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+        }
+
+        /* File Label Styles */
+        .file-label {
+            position: relative;
+            margin: 30px auto;
+            width: 80%;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1;
+        }
+
+        .file-label.open {
+            display: block;
+        }
+
+        .dropdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dropdown a {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .dropdown a:hover {
+            background-color: #e0e0e0;
+        }
+
+        .file-list {
+            margin: 0;
+            padding: 0;
+        }
+
+        .file-list li {
+            list-style: none;
+            margin: 10px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .file-list li:hover {
+            background: #e9ecef;
+        }
+
+        .file-list img {
+            width: 32px;
+            height: 32px;
+            margin-right: 15px;
+            object-fit: contain;
+        }
+
+        .file-list a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        .file-list .login-required {
+            color: #868e96;
+            position: relative;
+        }
+
+        .file-list .login-required::after {
+            content: "🔒 Login required";
+            position: absolute;
+            right: 10px;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        /* Login Prompt */
+        .login-prompt {
+            background: #fff3bf;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            display: none;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .file-label {
+                width: 90%;
+            }
+            .login-status {
+                top: 10px;
+                right: 10px;
+            }
+            .dropdown {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Hamburger Menus -->
+    <div class="hamburger-menu hamburger-menu-left" onclick="toggleSideLabel()">☰</div>
+    <div class="hamburger-menu hamburger-menu-right" onclick="toggleFileLabel()">📁</div>
+
+    <!-- Login Status Indicator -->
+    <div id="loginStatus" class="login-status" style="display:none">
+        <span id="welcomeMessage"></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Side Label Menu -->
+    <div class="side-label" id="sideLabel">
+        <a href="login.html">Log-In</a>
+        <a href="contact.html">Contact Me</a>
+        <a href="add_files.html" class="owner-only" id="addFilesLink">Add Files</a>
+        <a href="#" onclick="toggleSideLabel()">Close Menu</a>
+    </div>
+
+    <h1>HomePage</h1>
+    <p>Welcome to the brand new site of Neuille21!</p>
+
+    <!-- File Download Label -->
+    <div class="file-label" id="fileLabel">
+        <div class="dropdown">
+            <a href="#" onclick="filterFiles('all'); return false;">All Files</a>
+            <a href="#" onclick="filterFiles('computing'); return false;">Computing</a>
+            <a href="#" onclick="filterFiles('school'); return false;">School</a>
+            <a href="#" onclick="filterFiles('android'); return false;">Android</a>
+        </div>
+        
+        <ul id="file-list" class="file-list"></ul>
+        
+        <div id="loginPrompt" class="login-prompt">
+            <p>You need to <a href="login.html">log in</a> to download files</p>
+        </div>
+    </div>
+
+    <script>
+        // ========================
+        // AUTHENTICATION SYSTEM
+        // ========================
+        
+        // Check if user is logged in
+        function isLoggedIn() {
+            const authToken = localStorage.getItem('authToken');
+            const expiry = localStorage.getItem('sessionExpiry');
+            
+            if (authToken && expiry && Date.now() < parseInt(expiry)) {
+                return true;
+            }
+            
+            // Clear invalid session
+            if (authToken) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('sessionExpiry');
+            }
+            return false;
+        }
+        
+        // Check if current user is owner
+        function isOwner() {
+            if (!isLoggedIn()) return false;
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            return currentUser && currentUser.role === 'owner';
+        }
+        
+        // Update UI based on login status
+        function updateUI() {
+            const loggedIn = isLoggedIn();
+            const owner = isOwner();
+            
+            // Update login status display
+            if (loggedIn) {
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                document.getElementById('loginStatus').style.display = 'flex';
+                document.getElementById('welcomeMessage').textContent = `Hi, ${user.username}!`;
+            } else {
+                document.getElementById('loginStatus').style.display = 'none';
+            }
+            
+            // Show/hide owner-only elements
+            document.getElementById('addFilesLink').style.display = owner ? 'block' : 'none';
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('sessionExpiry');
+            window.location.reload();
+        }
+
+        // ========================
+        // MENU TOGGLE FUNCTIONS
+        // ========================
+        
+        function toggleFileLabel() {
+            const fileLabel = document.getElementById('fileLabel');
+            fileLabel.classList.toggle('open');
+            
+            // Close side label if open
+            const sideLabel = document.getElementById('sideLabel');
+            if (sideLabel.classList.contains('open')) {
+                sideLabel.classList.remove('open');
+                document.getElementById('overlay').style.display = 'none';
+            }
+        }
+        
+        function toggleSideLabel() {
+            const sideLabel = document.getElementById('sideLabel');
+            const overlay = document.getElementById('overlay');
+            
+            sideLabel.classList.toggle('open');
+            overlay.style.display = sideLabel.classList.contains('open') ? 'block' : 'none';
+            
+            // Close file label if open
+            const fileLabel = document.getElementById('fileLabel');
+            if (fileLabel.classList.contains('open')) {
+                fileLabel.classList.remove('open');
+            }
+        }
+        
+        // Close side menu when clicking overlay
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sideLabel').classlassList.remove('open');
+            this.style.display = 'none';
+        });
+
+        // ========================
+        // FILE SYSTEM (Updated for local server)
+        // ========================
+        
+        // Get file icon based on extension
+        function getFileIcon(fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            const icons = {
+                'txt': 'icons/text.png',
+                'pdf': 'icons/pdf.png',
+                'zip': 'icons/zip.png',
+                'apk': 'icons/android.png',
+                'pptx': 'icons/presentation.png',
+                'doc': 'icons/document.png',
+                'docx': 'icons/document.png',
+                'xls': 'icons/spreadsheet.png',
+                'xlsx': 'icons/spreadsheet.png',
+                'jpg': 'icons/image.png',
+                'jpeg': 'icons/image.png',
+                'png': 'icons/image.png',
+                'gif': 'icons/image.png'
+            };
+            return icons[extension] || 'icons/file.png';
+        }
+        
+        // Fetch files from server
+        async function filterFiles(category) {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = 'Loading...';
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/files?category=${category}`);
+                if (!response.ok) throw new Error('Failed to load files');
+                
+                const files = await response.json();
+                renderFiles(files);
+            } catch (error) {
+                fileList.innerHTML = 'Error loading files';
+                console.error(error);
+            }
+        }
+        
+        // Render files to the list
+        function renderFiles(files) {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = '';
+            
+            const loggedIn = isLoggedIn();
+            document.getElementById('loginPrompt').style.display = loggedIn ? 'none' : 'block';
+            
+            files.forEach(file => {
+                const li = document.createElement('li');
+                const img = document.createElement('img');
+                const link = document.createElement('a');
+                
+                img.src = getFileIcon(file.name);
+                img.alt = 'File icon';
+                
+                if (loggedIn) {
+                    link.href = file.path;
+                    link.textContent = file.label;
+                    link.download = file.name;
+                } else {
+                    link.href = '#';
+                    link.textContent = file.label;
+                    link.classList.add('login-required');
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        alert('Please log in to download files');
+                        window.location.href = 'login.html';
+                    };
+                }
+                
+                li.appendChild(img);
+                li.appendChild(link);
+                fileList.appendChild(li);
+            });
+        }
+
+        // ========================
+        // INITIALIZATION
+        // ========================
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            filterFiles('all');
+            
+            // Close menus when clicking outside
+            document.addEventListener('click', function(event) {
+                const fileLabel = document.getElementById('fileLabel');
+                const sideLabel = document.getElementById('sideLabel');
+                
+                if (!event.target.closest('.hamburger-menu-right') && 
+                    !event.target.closest('.file-label') &&
+                    fileLabel.classList.contains('open')) {
+                    fileLabel.classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

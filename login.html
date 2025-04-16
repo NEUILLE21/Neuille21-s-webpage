@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login/Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('../Images/Fond.png');
+            background-size: auto;
+            background-position: top left;
+            background-repeat: repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 2px solid #ddd;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #3498db;
+            color: #3498db;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('login')">Login</div>
+            <div class="tab" onclick="switchTab('register')">Register</div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="form-container active">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="loginUsername">Username:</label>
+                <input type="text" id="loginUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button onclick="handleLogin()">Login</button>
+            <div id="loginError" class="error-message"></div>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="registerForm" class="form-container">
+            <h2>Register</h2>
+            <div class="form-group">
+                <label for="regUsername">Username:</label>
+                <input type="text" id="regUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Password:</label>
+                <input type="password" id="regPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <button onclick="handleRegister()">Register</button>
+            <div id="registerError" class="error-message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Switch between login and register tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
+            
+            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`${tab}Form`).classList.add('active');
+        }
+
+        // Handle login
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorElement = document.getElementById('loginError');
+
+            errorElement.style.display = 'none';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    localStorage.setItem('sessionExpiry', Date.now() + 3600000); // 1 hour
+                    window.location.href = 'index.html';
+                } else {
+                    errorElement.textContent = data.error || 'Login failed';
+                    errorElement.style.display = 'block';
+                }
+            } catch (error) {
+                errorElement.textContent = 'Network error. Please try again.';
+                errorElement.style.display = 'block';
+            }
+        }
+
+        // Handle registration
+        async function handleRegister() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorElement = document.getElementById('registerError');
+
+            errorElement.style.display = 'none';
+
+            // Client-side validation
+            if (password !== confirmPassword) {
+                errorElement.textContent = 'Passwords do not match';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    switchTab('login');
+                    document.getElementById('loginUsername').value = username;
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    errorElement.textContent = data.error || 'Registration failed';
+                    errorElement.style.display = 'block';
+                }
+            } catch (error) {
+                errorElement.textContent = 'Network error. Please try again.';
+                errorElement.style.display = 'block';
+            }
+        }
+
+        // Auto-redirect if already logged in
+        if (localStorage.getItem('authToken')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
